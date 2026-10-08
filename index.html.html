@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>অভিভাবক মূল্যায়ন পোর্টাল - কামাখ্যাগুড়ি রামকৃষ্ণ শিশু উদ্যান</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Hind Siliguri', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts Bengali -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #030712;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.25) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.2) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.18) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-header {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-card-interactive {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card-interactive:hover, .glass-card-interactive:focus-within {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 12px 30px -5px rgba(99, 102, 241, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .glass-input {
+            background: rgba(8, 14, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #f8fafc;
+            transition: all 0.25s ease;
+        }
+
+        .glass-input:focus {
+            border-color: #6366f1;
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+            outline: none;
+        }
+
+        .star-icon {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .star-icon:hover, .star-icon:active {
+            transform: scale(1.35) rotate(-8deg);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+
+<body class="p-3 sm:p-6 md:p-10 pb-24 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header Section -->
+    <header class="max-w-3xl mx-auto w-full mb-6 sm:mb-8">
+        <div class="glass-header rounded-3xl p-4 sm:p-6 flex items-center justify-between gap-4 relative overflow-hidden">
+            <div class="flex items-center gap-4 z-10 w-full">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-amber-500 p-[2px] shadow-lg shadow-indigo-500/30 shrink-0">
+                    <div class="w-full h-full bg-slate-950/90 rounded-[14px] flex items-center justify-center">
+                        <i class="fa-solid fa-school text-2xl sm:text-3xl text-amber-400"></i>
+                    </div>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-lg sm:text-2xl font-bold tracking-tight text-white font-sans truncate drop-shadow">
+                        কামাখ্যাগুড়ি রামকৃষ্ণ শিশু উদ্যান
+                    </h1>
+                    <p class="text-xs sm:text-sm text-indigo-200/80 font-medium flex items-center gap-1.5 mt-0.5">
+                        <i class="fa-solid fa-star text-amber-400 text-[10px]"></i> অভিভাবক মূল্যায়ন ও ফিডব্যাক পোর্টাল
+                    </p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Form Container -->
+    <main class="max-w-3xl mx-auto w-full flex-1">
+        <form id="feedbackForm" onsubmit="handleFormSubmit(event)" class="space-y-6 sm:space-y-8">
+            
+            <!-- SECTION 1: Student & Parent Info -->
+            <div class="glass-card rounded-3xl p-5 sm:p-8 space-y-5">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-700/50">
+                    <h2 class="text-base sm:text-lg font-bold text-indigo-300 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm border border-indigo-500/30">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </span>
+                        শিক্ষার্থী ও অভিভাবকের পরিচয়
+                    </h2>
+                    <span class="text-[11px] font-medium text-slate-400 bg-slate-800/60 px-3 py-1 rounded-full border border-slate-700/40">
+                        <span class="text-rose-400">*</span> আবশ্যক
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                    
+                    <!-- Student Name -->
+                    <div class="sm:col-span-2 md:col-span-1">
+                        <label for="studentName" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                            শিক্ষার্থীর নাম <span class="text-rose-400">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="studentName" required class="w-full glass-input px-4 py-3 rounded-2xl text-sm pl-10 placeholder-slate-500" placeholder=" ">
+                            <i class="fa-solid fa-child text-slate-500 absolute left-3.5 top-3.5 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <!-- Class -->
+                    <div>
+                        <label for="studentClass" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                            শ্রেণী <span class="text-rose-400">*</span>
+                        </label>
+                        <div class="relative">
+                            <select id="studentClass" required class="w-full glass-input px-4 py-3 rounded-2xl text-sm pl-10 text-slate-200 cursor-pointer appearance-none">
+                                <option value="" class="bg-slate-900 text-slate-400">শ্রেণী নির্বাচন করুন</option>
+                                <option value="Nursery" class="bg-slate-900">নাসারী (Nursery)</option>
+                                <option value="KG-1" class="bg-slate-900">এল কে জি  (LKG)</option>
+                                <option value="KG-2" class="bg-slate-900">ইউ কে জি  (UKG)</option>
+                                <option value="Class 1" class="bg-slate-900">প্রথম শ্রেণী (Class 1)</option>
+                                <option value="Class 2" class="bg-slate-900">দ্বিতীয় শ্রেণী (Class 2)</option>
+                                <option value="Class 3" class="bg-slate-900">তৃতীয় শ্রেণী (Class 3)</option>
+                                <option value="Class 4" class="bg-slate-900">চতুর্থ শ্রেণী (Class 4)</option>
+                                <option value="Class 5" class="bg-slate-900">পঞ্চম শ্রেণী (Class 5)</option>
+                            </select>
+                            <i class="fa-solid fa-chalkboard text-slate-500 absolute left-3.5 top-3.5 text-sm"></i>
+                            <i class="fa-solid fa-chevron-down text-slate-500 absolute right-3.5 top-4 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Roll No -->
+                    <div>
+                        <label for="rollNo" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                            রোল নম্বর <span class="text-rose-400">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="rollNo" min="1" required class="w-full glass-input px-4 py-3 rounded-2xl text-sm pl-10 placeholder-slate-500" >
+                            <i class="fa-solid fa-hashtag text-slate-500 absolute left-3.5 top-3.5 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <!-- Parent Name -->
+                    <div>
+                        <label for="parentName" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                            অভিভাবকের নাম <span class="text-rose-400">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="parentName" required class="w-full glass-input px-4 py-3 rounded-2xl text-sm pl-10 placeholder-slate-500" >
+                            <i class="fa-solid fa-user-group text-slate-500 absolute left-3.5 top-3.5 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Number -->
+                    <div>
+                        <label for="mobileNo" class="block text-xs font-semibold text-slate-300 mb-1.5">
+                            মোবাইল নম্বর <span class="text-rose-400">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="tel" id="mobileNo" required pattern="[0-9]{10}" maxlength="10" class="w-full glass-input px-4 py-3 rounded-2xl text-sm pl-10 placeholder-slate-500" >
+                            <i class="fa-solid fa-phone text-slate-500 absolute left-3.5 top-3.5 text-sm"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SECTION 2: Evaluation Categories -->
+            <div class="glass-card rounded-3xl p-5 sm:p-8 space-y-6">
+                <div class="pb-3 border-b border-slate-700/50 flex items-center justify-between">
+                    <h2 class="text-base sm:text-lg font-bold text-amber-400 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm border border-amber-500/30">
+                            <i class="fa-solid fa-star"></i>
+                        </span>
+                        বিদ্যালয়ের বিষয়ভিত্তিক মূল্যায়ন
+                    </h2>
+                    <span class="text-xs text-amber-300/80 font-medium hidden sm:inline-block">স্টার ক্লিক করে মতামত দিন</span>
+                </div>
+
+                <div class="space-y-5">
+
+                    <!-- Q1: Academics -->
+                    <div class="glass-card-interactive p-4 sm:p-5 rounded-2xl space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <label class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-book-open text-indigo-400 text-xs"></i>
+                                ১. পড়াশোনা ও শিক্ষাদানের মান <span class="text-rose-400">*</span>
+                            </label>
+                            
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span id="academic-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700">সিলেক্ট করুন</span>
+                                <div class="flex items-center gap-3 bg-slate-950/60 px-4 py-2 rounded-full border border-slate-800">
+                                    <div class="star-rating flex items-center gap-1.5" data-category="academic">
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('academic', 1)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('academic', 2)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('academic', 3)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('academic', 4)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('academic', 5)"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-amber-400 min-w-[32px] text-right" id="academic-score">০/৫</span>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea id="academicComment" rows="2" class="w-full glass-input p-3 rounded-xl text-xs sm:text-sm placeholder-slate-500" placeholder="পড়াশোনা সম্পর্কিত মতামত লিখুন (ঐচ্ছিক)..."></textarea>
+                    </div>
+
+                    <!-- Q2: Discipline -->
+                    <div class="glass-card-interactive p-4 sm:p-5 rounded-2xl space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <label class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-shield-halved text-emerald-400 text-xs"></i>
+                                ২. ডিসিপ্লিন ও শৃঙ্খলা <span class="text-rose-400">*</span>
+                            </label>
+                            
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span id="discipline-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700">সিলেক্ট করুন</span>
+                                <div class="flex items-center gap-3 bg-slate-950/60 px-4 py-2 rounded-full border border-slate-800">
+                                    <div class="star-rating flex items-center gap-1.5" data-category="discipline">
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('discipline', 1)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('discipline', 2)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('discipline', 3)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('discipline', 4)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('discipline', 5)"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-amber-400 min-w-[32px] text-right" id="discipline-score">০/৫</span>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea id="disciplineComment" rows="2" class="w-full glass-input p-3 rounded-xl text-xs sm:text-sm placeholder-slate-500" placeholder="শৃঙ্খলা সম্পর্কিত মতামত (ঐচ্ছিক)..."></textarea>
+                    </div>
+
+                    <!-- Q3: Teachers -->
+                    <div class="glass-card-interactive p-4 sm:p-5 rounded-2xl space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <label class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-chalkboard-user text-cyan-400 text-xs"></i>
+                                ৩. শিক্ষক/স্যারদের আচরণ ও দায়িত্ব <span class="text-rose-400">*</span>
+                            </label>
+                            
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span id="teachers-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700">সিলেক্ট করুন</span>
+                                <div class="flex items-center gap-3 bg-slate-950/60 px-4 py-2 rounded-full border border-slate-800">
+                                    <div class="star-rating flex items-center gap-1.5" data-category="teachers">
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('teachers', 1)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('teachers', 2)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('teachers', 3)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('teachers', 4)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('teachers', 5)"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-amber-400 min-w-[32px] text-right" id="teachers-score">০/৫</span>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea id="teachersComment" rows="2" class="w-full glass-input p-3 rounded-xl text-xs sm:text-sm placeholder-slate-500" placeholder="শিক্ষক/স্যারদের জন্য মন্তব্য (ঐচ্ছিক)..."></textarea>
+                    </div>
+
+                    <!-- Q4: Masis -->
+                    <div class="glass-card-interactive p-4 sm:p-5 rounded-2xl space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <label class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-hand-holding-heart text-rose-400 text-xs"></i>
+                                ৪. অশিক্ষক কর্মচারী ও মাসীদের যত্ন <span class="text-rose-400">*</span>
+                            </label>
+                            
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span id="masis-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700">সিলেক্ট করুন</span>
+                                <div class="flex items-center gap-3 bg-slate-950/60 px-4 py-2 rounded-full border border-slate-800">
+                                    <div class="star-rating flex items-center gap-1.5" data-category="masis">
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('masis', 1)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('masis', 2)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('masis', 3)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('masis', 4)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('masis', 5)"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-amber-400 min-w-[32px] text-right" id="masis-score">০/৫</span>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea id="masisComment" rows="2" class="w-full glass-input p-3 rounded-xl text-xs sm:text-sm placeholder-slate-500" placeholder="মাসীদের যত্ন ও ব্যবহার নিয়ে মন্তব্য (ঐচ্ছিক)..."></textarea>
+                    </div>
+
+                    <!-- Q5: Environment -->
+                    <div class="glass-card-interactive p-4 sm:p-5 rounded-2xl space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <label class="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-leaf text-teal-400 text-xs"></i>
+                                ৫. পরিবেশ, পরিচ্ছন্নতা ও নিরাপত্তা <span class="text-rose-400">*</span>
+                            </label>
+                            
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span id="environment-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700">সিলেক্ট করুন</span>
+                                <div class="flex items-center gap-3 bg-slate-950/60 px-4 py-2 rounded-full border border-slate-800">
+                                    <div class="star-rating flex items-center gap-1.5" data-category="environment">
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('environment', 1)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('environment', 2)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('environment', 3)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('environment', 4)"></i>
+                                        <i class="fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon" onclick="setRating('environment', 5)"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-amber-400 min-w-[32px] text-right" id="environment-score">০/৫</span>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea id="environmentComment" rows="2" class="w-full glass-input p-3 rounded-xl text-xs sm:text-sm placeholder-slate-500" placeholder="পরিবেশ ও পরিচ্ছন্নতা সংক্রান্ত মতামত (ঐচ্ছিক)..."></textarea>
+                    </div>
+
+                </div>
+
+                <!-- General Suggestions -->
+                <div class="pt-4 border-t border-slate-800">
+                    <label for="generalSuggestions" class="block text-sm font-semibold text-slate-200 mb-2">
+                        ৬. অতিরিক্ত কোনো পরামর্শ বা সামগ্রিক গঠনমূলক মতামত
+                    </label>
+                    <textarea id="generalSuggestions" rows="3" class="w-full glass-input p-4 rounded-2xl text-xs sm:text-sm placeholder-slate-500" placeholder="বিদ্যালয়ের সামগ্রিক উন্নতির জন্য আপনার যেকোনো মূল্যবান কথা বা পরামর্শ লিখুন..."></textarea>
+                </div>
+
+                <!-- Submit Button Container -->
+                <div class="pt-2">
+                    <button type="submit" id="submitBtn" class="w-full sm:w-auto sm:min-w-[240px] ml-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-bold text-base shadow-xl shadow-indigo-600/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3">
+                        <span>ফিডব্যাক জমা দিন</span>
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-3xl mx-auto w-full mt-10 text-center">
+        <p class="text-xs text-slate-500 font-medium">
+            © Kamakhyaguri Ramkrishna Sishu Udyan • All Rights Reserved
+        </p>
+    </footer>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast" class="fixed bottom-6 right-6 left-6 sm:left-auto sm:max-w-md z-50 transform translate-y-28 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-inner" class="glass-card p-4 rounded-2xl shadow-2xl flex items-center gap-3.5 border border-slate-700/80">
+            <div id="toast-icon-bg" class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                <i id="toast-icon" class="fa-solid fa-circle-check text-lg"></i>
+            </div>
+            <div class="flex-1">
+                <h4 id="toast-title" class="text-xs font-bold text-slate-200">বিজ্ঞপ্তি</h4>
+                <p id="toast-message" class="text-xs text-slate-400 mt-0.5">মেসেজ টেক্সট</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // HARDCODED FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyCzJ4axa9wV9lwy0fy1xn8wAqWsuqbJ93E",
+            authDomain: "school-management-74254.firebaseapp.com",
+            databaseURL: "https://school-management-74254-default-rtdb.firebaseio.com",
+            projectId: "school-management-74254",
+            storageBucket: "school-management-74254.firebasestorage.app",
+            messagingSenderId: "991469098027",
+            appId: "1:991469098027:web:e5a7386712eee671e8c66e"
+        };
+
+        let ratings = { academic: 0, discipline: 0, teachers: 0, masis: 0, environment: 0 };
+        let database = null;
+
+        const ratingLabels = {
+            1: { text: "উন্নতি প্রয়োজন", color: "bg-rose-500/20 text-rose-300 border-rose-500/30" },
+            2: { text: "মোটামুটি", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" },
+            3: { text: "ভালো", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" },
+            4: { text: "খুব ভালো", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" },
+            5: { text: "অসাধারণ", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" }
+        };
+
+        window.onload = function() {
+            initFirebase();
+        };
+
+        function initFirebase() {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                database = firebase.database();
+            } catch (e) {
+                console.error("Firebase Initialization Failed", e);
+            }
+        }
+
+        function setRating(category, score) {
+            ratings[category] = score;
+            const container = document.querySelector(`.star-rating[data-category="${category}"]`);
+            if (!container) return;
+
+            const stars = container.querySelectorAll('.star-icon');
+            const scoreDisplay = document.getElementById(`${category}-score`);
+            const badge = document.getElementById(`${category}-badge`);
+
+            stars.forEach((star, index) => {
+                if (index < score) {
+                    star.className = "fa-solid fa-star text-amber-400 text-2xl cursor-pointer star-icon";
+                } else {
+                    star.className = "fa-regular fa-star text-amber-400 text-2xl cursor-pointer star-icon";
+                }
+            });
+
+            const bnDigits = ['০', '১', '২', '৩', '৪', '৫'];
+            if (scoreDisplay) {
+                scoreDisplay.innerText = `${bnDigits[score]}/৫`;
+            }
+
+            if (badge && ratingLabels[score]) {
+                badge.innerText = ratingLabels[score].text;
+                badge.className = `text-[11px] font-bold px-2.5 py-1 rounded-full border ${ratingLabels[score].color} transition-all duration-300`;
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const requiredCategories = ['academic', 'discipline', 'teachers', 'masis', 'environment'];
+            const missing = requiredCategories.filter(cat => ratings[cat] === 0);
+
+            if (missing.length > 0) {
+                showToast("দয়া করে সকল বিষয়ভিত্তিক রেটিং প্রদান করুন!", "error");
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>জমা করা হচ্ছে...</span>`;
+
+            const formData = {
+                id: 'FB-' + Date.now(),
+                timestamp: new Date().toISOString(),
+                formattedDate: new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                studentName: document.getElementById('studentName').value.trim(),
+                studentClass: document.getElementById('studentClass').value,
+                rollNo: document.getElementById('rollNo').value.trim(),
+                parentName: document.getElementById('parentName').value.trim(),
+                mobileNo: document.getElementById('mobileNo').value.trim(),
+                ratings: { ...ratings },
+                comments: {
+                    academic: document.getElementById('academicComment').value.trim(),
+                    discipline: document.getElementById('disciplineComment').value.trim(),
+                    teachers: document.getElementById('teachersComment').value.trim(),
+                    masis: document.getElementById('masisComment').value.trim(),
+                    environment: document.getElementById('environmentComment').value.trim(),
+                    general: document.getElementById('generalSuggestions').value.trim()
+                }
+            };
+
+            if (database) {
+                database.ref('parent_feedbacks/' + formData.id).set(formData)
+                    .then(() => {
+                        finishSubmission(submitBtn, originalBtnText, "আপনার মূল্যবান ফিডব্যাকটি সফলভাবে জমা হয়েছে। ধন্যবাদ!");
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        showToast("ডাটা জমা দিতে ব্যর্থ হয়েছে: " + err.message, "error");
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    });
+            } else {
+                showToast("ফায়ারবেস কানেকশন সফল হয়নি!", "error");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        }
+
+        function finishSubmission(btn, originalHtml, message) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            showToast(message, "success");
+            resetForm();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('feedbackForm').reset();
+            Object.keys(ratings).forEach(cat => {
+                setRating(cat, 0);
+                const badge = document.getElementById(`${cat}-badge`);
+                if (badge) {
+                    badge.innerText = "সিলেক্ট করুন";
+                    badge.className = "text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700";
+                }
+            });
+        }
+
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIconBg = document.getElementById('toast-icon-bg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMessage.innerText = msg;
+
+            if (type === "success") {
+                toastTitle.innerText = "সফল হয়েছে";
+                toastIconBg.className = "w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30";
+                toastIcon.className = "fa-solid fa-circle-check text-lg";
+            } else {
+                toastTitle.innerText = "সতর্কতা";
+                toastIconBg.className = "w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/30";
+                toastIcon.className = "fa-solid fa-circle-exclamation text-lg";
+            }
+
+            toast.classList.remove('translate-y-28', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-28', 'opacity-0', 'pointer-events-none');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
